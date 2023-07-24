@@ -754,9 +754,9 @@ impl CPU {
     }
 
     fn load_indirect_y(&mut self) -> Result<i8, String> {
-        let address = self.fetch()?;
-        let lsb = self.memory.get(address, 0, 0);
-        let msb_address = utils::combine(address, 0, 1) as u8;
+        let lsb_address = self.fetch()?;
+        let msb_address = lsb_address + 1;;
+        let lsb = self.memory.get16(lsb_address as u16);
         let msb = self.memory.get16(msb_address as u16);
         Ok(self.memory.get(lsb, msb, self.y as u8) as i8)
     }
@@ -945,9 +945,9 @@ impl CPU {
     }
 
     fn store_indirect_y(&mut self, value: i8) -> Result<(), String> {
-        let address = self.fetch()?;
-        let lsb = self.memory.get(address, 0, 0);
-        let msb_address = utils::combine(address, 0, 1) as u8;
+        let lsb_address = self.fetch()?;
+        let msb_address = lsb_address + 1;
+        let lsb = self.memory.get16(lsb_address as u16);
         let msb = self.memory.get16(msb_address as u16);
         self.memory.set(lsb, msb, self.y as u8, value as u8);
         Ok(())
