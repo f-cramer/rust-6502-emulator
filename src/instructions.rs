@@ -744,21 +744,31 @@ impl CPU {
         Ok(self.fetch()? as i8)
     }
 
-    fn load_indirect_x(&mut self) -> Result<i8, String> {
+    fn load_indirect_address_impl(&mut self, lsb_offset: i8, combine_offset: i8) -> Result<u16, String> {
         let zp_offset = self.fetch()?;
-        let lsb_address = utils::combine(zp_offset, 0, self.x as u8) as u8;
+        let lsb_address = utils::combine(zp_offset, 0, lsb_offset as u8) as u8;
         let msb_address = lsb_address + 1;
         let lsb = self.memory.get16(lsb_address as u16);
         let msb = self.memory.get16(msb_address as u16);
-        Ok(self.memory.get(lsb, msb, 0) as i8)
+        Ok(utils::combine(lsb, msb, combine_offset as u8))
+    }
+
+    fn load_indirect_x(&mut self) -> Result<i8, String> {
+        let address = self.load_indirect_x_address()?;
+        Ok(self.memory.get16(address) as i8)
+    }
+
+    fn load_indirect_x_address(&mut self) -> Result<u16, String> {
+        Ok(self.load_indirect_address_impl(self.x, 0)?)
     }
 
     fn load_indirect_y(&mut self) -> Result<i8, String> {
-        let lsb_address = self.fetch()?;
-        let msb_address = lsb_address + 1;;
-        let lsb = self.memory.get16(lsb_address as u16);
-        let msb = self.memory.get16(msb_address as u16);
-        Ok(self.memory.get(lsb, msb, self.y as u8) as i8)
+        let address = self.load_indirect_y_address()?;
+        Ok(self.memory.get16(address) as i8)
+    }
+
+    fn load_indirect_y_address(&mut self) -> Result<u16, String> {
+        Ok(self.load_indirect_address_impl(0, self.y)?)
     }
 
     fn load_zeropage(&mut self) -> Result<i8, String> {
@@ -935,21 +945,14 @@ impl CPU {
     }
 
     fn store_indirect_x(&mut self, value: i8) -> Result<(), String> {
-        let zp_offset = self.fetch()?;
-        let lsb_address = utils::combine(zp_offset, 0, self.x as u8) as u8;
-        let msb_address = lsb_address + 1;
-        let lsb = self.memory.get16(lsb_address as u16);
-        let msb = self.memory.get16(msb_address as u16);
-        self.memory.set(lsb, msb, 0, value as u8);
+        let address = self.load_indirect_x_address()?;
+        self.memory.set16(address, value as u8);
         Ok(())
     }
 
     fn store_indirect_y(&mut self, value: i8) -> Result<(), String> {
-        let lsb_address = self.fetch()?;
-        let msb_address = lsb_address + 1;
-        let lsb = self.memory.get16(lsb_address as u16);
-        let msb = self.memory.get16(msb_address as u16);
-        self.memory.set(lsb, msb, self.y as u8, value as u8);
+        let address = self.load_indirect_y_address()?;
+        self.memory.set16(address, value as u8);
         Ok(())
     }
 
