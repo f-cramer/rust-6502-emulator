@@ -528,6 +528,7 @@ pub fn run_instruction(instruction: &Instruction, cpu: &mut CPU) -> Result<(), S
             let value = cpu.load_zeropage_x()?;
             cpu.inclusive_or(value);
         }
+        PHA => cpu.push(cpu.a as u8),
         PHP => {
             let old = cpu.b;
             cpu.b = true;
@@ -544,7 +545,6 @@ pub fn run_instruction(instruction: &Instruction, cpu: &mut CPU) -> Result<(), S
             cpu.set_sr(pulled);
             cpu.b = old;
         }
-        PHA => cpu.push(cpu.a as u8),
         ROL_ABS => cpu.load_store_absolute(|(c, value)| c.rol(value))?,
         ROL_ABSX => cpu.load_store_absolute_x(|(c, value)| c.rol(value))?,
         ROL_ACC => {
