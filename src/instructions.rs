@@ -693,17 +693,6 @@ impl CPU {
         self.set_status(self.a);
     }
 
-    fn get_sr(&self) -> u8 {
-        (if self.n { 1 } else { 0 } << 7) +
-            (if self.v { 1 } else { 0 } << 6) +
-            (1 << 5) +
-            (if self.b { 1 } else { 0 } << 4) +
-            (if self.d { 1 } else { 0 } << 3) +
-            (if self.i { 1 } else { 0 } << 2) +
-            (if self.z { 1 } else { 0 } << 1) +
-            (if self.c { 1 } else { 0 } << 0)
-    }
-
     fn inc(&mut self, value: i8) -> i8 {
         let new_value = value.wrapping_add(1);
         self.set_status(new_value);

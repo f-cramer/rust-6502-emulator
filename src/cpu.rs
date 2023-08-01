@@ -1,7 +1,8 @@
+use std::fmt::{Debug, Formatter};
+
 use crate::{instructions, utils};
 use crate::instructions::run_instruction;
 
-#[derive(Debug)]
 pub struct CPU {
     pub memory: Memory,
 
@@ -58,6 +59,57 @@ impl CPU {
         self.pc = self.pc + 1;
         Ok(memory)
     }
+
+    pub fn get_sr(&self) -> u8 {
+        (if self.n { 1 } else { 0 } << 7) +
+            (if self.v { 1 } else { 0 } << 6) +
+            (1 << 5) +
+            (if self.b { 1 } else { 0 } << 4) +
+            (if self.d { 1 } else { 0 } << 3) +
+            (if self.i { 1 } else { 0 } << 2) +
+            (if self.z { 1 } else { 0 } << 1) +
+            (if self.c { 1 } else { 0 } << 0)
+    }
+
+    fn format_sr(&self) -> String {
+        format!(
+            "{:#010b} (n: {}, v: {}, b: {}, d: {}, i: {}, z: {}, c: {})",
+            self.get_sr(),
+            bool_to_u8(self.n),
+            bool_to_u8(self.v),
+            bool_to_u8(self.b),
+            bool_to_u8(self.d),
+            bool_to_u8(self.i),
+            bool_to_u8(self.z),
+            bool_to_u8(self.c),
+        )
+    }
+}
+
+impl Debug for CPU {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f, "CPU {{ a: {}, x: {}, y: {}, pc: {}, sp: {}, sr: {} }}",
+            format_i8(self.a),
+            format_i8(self.x),
+            format_i8(self.y),
+            format_u16(self.pc),
+            format_u16(self.sp),
+            self.format_sr(),
+        )
+    }
+}
+
+fn bool_to_u8(value: bool) -> u8 {
+    if value { 1 } else { 0 }
+}
+
+fn format_i8(value: i8) -> String {
+    format!("{}[{:#}, {:#04X}, {:#010b}]", value, value as u8, value, value)
+}
+
+fn format_u16(value: u16) -> String {
+    format!("{} [{:#06X}]", value, value)
 }
 
 #[derive(Debug)]
@@ -70,6 +122,7 @@ impl Memory {
         let address = utils::combine(lsb, msb, offset);
         self.get16(address)
     }
+
     pub fn get16(&self, address: u16) -> u8 {
         self.data[address as usize]
     }
