@@ -1,5 +1,3 @@
-#![feature(fn_traits)]
-
 use std::{env, fs};
 use std::process::exit;
 
