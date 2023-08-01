@@ -43,15 +43,23 @@ impl CPU {
         }
     }
 
-    pub fn execute(&mut self) -> Result<(), String> {
+    pub fn execute(&mut self, success_instruction: u16) -> Result<ExecutionFinished, String> {
+        let address = self.pc;
+        if address == success_instruction {
+            return Ok(ExecutionFinished::YES);
+        }
+
         let operation = self.fetch()?;
-        let instruction = instructions::parse_opcode(operation)?;
+        let instruction = match instructions::parse_opcode(operation) {
+            Ok(i) => i,
+            Err(v) => return Err(format!("{} at address {:#06X}", v, address))
+        };
         if self.instruction_count % 1000000 == 0 {
-            println!("{}: running instruction {:?} from {:#06X}", self.instruction_count, instruction, self.pc - 1);
+            println!("{}: running instruction {:?} at address {:#06X}", self.instruction_count, instruction, address);
         }
         run_instruction(&instruction, self)?;
         self.instruction_count = self.instruction_count + 1;
-        Ok(())
+        Ok(ExecutionFinished::NO)
     }
 
     pub fn fetch(&mut self) -> Result<u8, String> {
@@ -135,4 +143,10 @@ impl Memory {
     pub fn set16(&mut self, address: u16, value: u8) {
         self.data[address as usize] = value;
     }
+}
+
+#[derive(PartialEq)]
+pub enum ExecutionFinished {
+    YES,
+    NO,
 }
