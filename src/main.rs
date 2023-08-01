@@ -12,7 +12,7 @@ mod utils;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() <= 1 {
-        println!("no file to interpret given");
+        eprintln!("no file to interpret given");
         exit(1);
     }
 
