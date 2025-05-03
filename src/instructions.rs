@@ -5,6 +5,7 @@ use crate::utils;
 macro_rules! define_instructions {
     ( $( $name:ident $opcode:literal ),* $(,)?) => {
         #[allow(non_camel_case_types)]
+        #[allow(clippy::upper_case_acronyms)]
         #[derive(Debug)]
         pub enum Instruction {
             $(
@@ -835,7 +836,7 @@ impl CPU {
     }
 
     fn and(&mut self, value: i8) {
-        self.a = self.a & value;
+        self.a &= value;
         self.set_status(self.a);
     }
 
@@ -880,7 +881,7 @@ impl CPU {
     }
 
     fn exclusive_or(&mut self, value: i8) {
-        self.a = self.a ^ value;
+        self.a ^= value;
         self.set_status(self.a);
     }
 
@@ -896,7 +897,7 @@ impl CPU {
     }
 
     fn load_absolute_address(&mut self) -> Result<u16, String> {
-        Ok(self.load_absolute_address_impl(0)?)
+        self.load_absolute_address_impl(0)
     }
 
     fn load_absolute_address_impl(&mut self, offset: i8) -> Result<u16, String> {
@@ -911,7 +912,7 @@ impl CPU {
     }
 
     fn load_absolute_x_address(&mut self) -> Result<u16, String> {
-        Ok(self.load_absolute_address_impl(self.x)?)
+        self.load_absolute_address_impl(self.x)
     }
 
     fn load_absolute_y(&mut self) -> Result<i8, String> {
@@ -934,7 +935,7 @@ impl CPU {
     }
 
     fn load_indirect_address(&mut self) -> Result<u16, String> {
-        Ok(self.load_indirect_address_impl(0, 0)?)
+        self.load_indirect_address_impl(0, 0)
     }
 
     fn load_indirect_address_impl(&mut self, lsb_offset: i8, combine_offset: i8) -> Result<u16, String> {
@@ -952,7 +953,7 @@ impl CPU {
     }
 
     fn load_indirect_x_address(&mut self) -> Result<u16, String> {
-        Ok(self.load_indirect_address_impl(self.x, 0)?)
+        self.load_indirect_address_impl(self.x, 0)
     }
 
     fn load_indirect_y(&mut self) -> Result<i8, String> {
@@ -961,7 +962,7 @@ impl CPU {
     }
 
     fn load_indirect_y_address(&mut self) -> Result<u16, String> {
-        Ok(self.load_indirect_address_impl(0, self.y)?)
+        self.load_indirect_address_impl(0, self.y)
     }
 
     fn load_zeropage(&mut self) -> Result<i8, String> {
@@ -1033,7 +1034,7 @@ impl CPU {
     }
 
     fn inclusive_or(&mut self, value: i8) {
-        self.a = self.a | value;
+        self.a |= value;
         self.set_status(self.a);
     }
 
@@ -1233,7 +1234,6 @@ fn from_bcd(value: i8) -> i16 {
     (upper_bits * 10 + lower_bits) as i16
 }
 
-#[allow(clippy::wrong_self_convention)]
 fn to_bcd(value: i8) -> i8 {
     let value = value as u8;
 

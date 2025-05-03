@@ -1,8 +1,9 @@
 use std::fmt::{Debug, Formatter};
 
-use crate::{instructions, utils};
 use crate::instructions::run_instruction;
+use crate::{instructions, utils};
 
+#[allow(clippy::upper_case_acronyms)]
 pub struct CPU {
     pub memory: Memory,
 
@@ -52,31 +53,34 @@ impl CPU {
         let operation = self.fetch()?;
         let instruction = match instructions::parse_opcode(operation) {
             Ok(i) => i,
-            Err(v) => return Err(format!("{} at address {:#06X}", v, address))
+            Err(v) => return Err(format!("{} at address {:#06X}", v, address)),
         };
         if self.instruction_count % 1000000 == 0 {
-            println!("{}: running instruction {:?} at address {:#06X}", self.instruction_count, instruction, address);
+            println!(
+                "{}: running instruction {:?} at address {:#06X}",
+                self.instruction_count, instruction, address
+            );
         }
         run_instruction(&instruction, self)?;
-        self.instruction_count = self.instruction_count + 1;
+        self.instruction_count += 1;
         Ok(ExecutionFinished::NO)
     }
 
     pub fn fetch(&mut self) -> Result<u8, String> {
         let memory = self.memory.data[self.pc as usize];
-        self.pc = self.pc + 1;
+        self.pc += 1;
         Ok(memory)
     }
 
     pub fn get_sr(&self) -> u8 {
-        (if self.n { 1 } else { 0 } << 7) +
-            (if self.v { 1 } else { 0 } << 6) +
-            (1 << 5) +
-            (if self.b { 1 } else { 0 } << 4) +
-            (if self.d { 1 } else { 0 } << 3) +
-            (if self.i { 1 } else { 0 } << 2) +
-            (if self.z { 1 } else { 0 } << 1) +
-            (if self.c { 1 } else { 0 } << 0)
+        (if self.n { 1 } else { 0 } << 7)
+            + (if self.v { 1 } else { 0 } << 6)
+            + (1 << 5)
+            + (if self.b { 1 } else { 0 } << 4)
+            + (if self.d { 1 } else { 0 } << 3)
+            + (if self.i { 1 } else { 0 } << 2)
+            + (if self.z { 1 } else { 0 } << 1)
+            + (if self.c { 1 } else { 0 })
     }
 
     fn format_sr(&self) -> String {
@@ -97,7 +101,8 @@ impl CPU {
 impl Debug for CPU {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
-            f, "CPU {{ a: {}, x: {}, y: {}, pc: {}, sp: {}, sr: {} }}",
+            f,
+            "CPU {{ a: {}, x: {}, y: {}, pc: {}, sp: {}, sr: {} }}",
             format_i8(self.a),
             format_i8(self.x),
             format_i8(self.y),
@@ -109,11 +114,18 @@ impl Debug for CPU {
 }
 
 fn bool_to_u8(value: bool) -> u8 {
-    if value { 1 } else { 0 }
+    if value {
+        1
+    } else {
+        0
+    }
 }
 
 fn format_i8(value: i8) -> String {
-    format!("{}[{:#}, {:#04X}, {:#010b}]", value, value as u8, value, value)
+    format!(
+        "{}[{:#}, {:#04X}, {:#010b}]",
+        value, value as u8, value, value
+    )
 }
 
 fn format_u16(value: u16) -> String {
@@ -146,6 +158,7 @@ impl Memory {
 }
 
 #[derive(PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum ExecutionFinished {
     YES,
     NO,
